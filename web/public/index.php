@@ -1,15 +1,10 @@
 <?php
 
-use App\Foo;
-use App\HomeController;
+use App\Controllers\ReportingController;
 
 $container = require __DIR__ . '/../app/bootstrap/autoload.php';
-
-$foo = $container->get(Foo::class);
-//$foo->getName();
-
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-  $r->addRoute('GET', '/users', HomeController::class);
+  $r->addRoute('POST', '/reports', ReportingController::class);
   // {id} must be a number (\d+)
   $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
   // The /{title} suffix is optional
