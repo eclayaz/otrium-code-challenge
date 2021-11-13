@@ -2,6 +2,7 @@
 
 
 use App\Acme\FooInterface;
+use App\Acme\Http\Controller\HomeController;
 use App\Acme\Mailer;
 use App\Acme\UserManager;
 use App\Acme\Foo;
@@ -11,4 +12,5 @@ return [
   Mailer::class => DI\autowire(Mailer::class),
   UserManager::class => DI\autowire(UserManager::class),
   FooInterface::class => DI\autowire(Foo::class),
+  HomeController::class => DI\autowire(HomeController::class),
 ];
