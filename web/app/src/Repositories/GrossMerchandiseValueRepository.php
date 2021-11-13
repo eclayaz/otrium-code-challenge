@@ -2,24 +2,19 @@
 
 namespace App\Repositories;
 
+use App\DTOs\Brand;
 use App\Exceptions\NotFoundHttpException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception as DBALDriverException;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Statement;
+use Doctrine\ORM\EntityManager;
 
-class GrossMerchandiseValueRepository implements GrossMerchandiseValueRepositoryInterface
+final class GrossMerchandiseValueRepository extends BaseRepository implements GrossMerchandiseValueRepositoryInterface
 {
-  private Connection $connection;
-
-  public function __construct(Connection $connection)
-  {
-    $this->connection = $connection;
-  }
-
   public function getSevenDayTurnoverPerBrand(string $startDate, string $endDate, float $vat): array
   {
-    $sql = "
+    $query = "
             select date as 'day', b.name as 'brand_name', sum(turnover * :vat_deduction) as 'turnover_excluding_vat'
             from gmv
             join brands b on b.id = gmv.brand_id
@@ -28,17 +23,17 @@ class GrossMerchandiseValueRepository implements GrossMerchandiseValueRepository
             order by date
             ";
 
-    $stmt = $this->connection->prepare($sql);
-    $stmt->bindValue(':start', $startDate);
-    $stmt->bindValue(':end', $endDate);
-    $stmt->bindValue(':vat_deduction', 1 - $vat);
+    $statement = $this->connection->prepare($query);
+    $statement->bindValue(':start', $startDate);
+    $statement->bindValue(':end', $endDate);
+    $statement->bindValue(':vat_deduction', 1 - $vat);
 
-    return $this->findOrFail($stmt);
+    return $this->find($statement);
   }
 
   public function getSevenDayTurnoverPerDay(string $startDate, string $endDate, float $vat): array
   {
-    $sql = "
+    $query = "
             select date as 'day', sum(turnover * :vat_deduction) as 'turnover_excluding_vat'
             from gmv
                      join brands b on b.id = gmv.brand_id
@@ -47,30 +42,25 @@ class GrossMerchandiseValueRepository implements GrossMerchandiseValueRepository
             order by date
             ";
 
-    $stmt = $this->connection->prepare($sql);
-    $stmt->bindValue(':start', $startDate);
-    $stmt->bindValue(':end', $endDate);
-    $stmt->bindValue(':vat_deduction', 1 - $vat);
+    $statement = $this->connection->prepare($query);
+    $statement->bindValue(':start', $startDate);
+    $statement->bindValue(':end', $endDate);
+    $statement->bindValue(':vat_deduction', 1 - $vat);
 
-    return $this->findOrFail($stmt);
+    return $this->find($statement);
   }
 
-  /**
-   * @param Statement $stmt
-   * @return array
-   * @throws DBALDriverException
-   * @throws Exception
-   * @throws NotFoundHttpException
-   */
-  private function findOrFail(Statement $stmt): array
+  public function findX(): array
   {
-    $resultSet = $stmt->executeQuery();
-    $data = $resultSet->fetchAllAssociative();
+    /* @var $entityManager EntityManager */
+    $entityManager = $this->getDoctrine()->getManager();
 
-    if (count($data) === 0) {
-      throw new NotFoundHttpException('No data found for given time period');
-    }
+    $result = $entityManager->createQueryBuilder()
+      ->from(Brand::class, 'u')
+      ->getQuery()
+      ->getResult();
 
-    return $data;
+    var_dump($result);
+    die('uu');
   }
 }

@@ -24,6 +24,7 @@ class ReportingService implements ReportingServiceInterface
    */
   public function createTurnoverPerBrandReport(string $startDate, int $duration): string
   {
+    $this->gmvRepository->findX();
     try {
       $data = $this->gmvRepository->getSevenDayTurnoverPerBrand(
         $startDate,
