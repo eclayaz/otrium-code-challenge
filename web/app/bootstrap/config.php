@@ -1,11 +1,11 @@
 <?php
 
 
-use App\Acme\FooInterface;
-use App\Acme\Http\Controller\HomeController;
-use App\Acme\Mailer;
-use App\Acme\UserManager;
-use App\Acme\Foo;
+use App\FooInterface;
+use App\HomeController;
+use App\Mailer;
+use App\UserManager;
+use App\Foo;
 
 return [
   // Bind an interface to an implementation

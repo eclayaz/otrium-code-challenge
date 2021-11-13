@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":{"AppTest\\Acme\\FooTest::testGetName":0.017}}
+{"version":1,"defects":{"AppTest\\Acme\\FooTest::testGetName":4,"AppTest\\FooTest::testGetName":4},"times":{"AppTest\\Acme\\FooTest::testGetName":0.018,"AppTest\\FooTest::testGetName":0.017}}

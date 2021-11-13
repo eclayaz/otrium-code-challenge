@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Acme;
+namespace App;
 
 class Mailer
 {

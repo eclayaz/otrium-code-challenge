@@ -1,7 +1,7 @@
 <?php
 
-use App\Acme\Foo;
-use App\Acme\HomeController;
+use App\Foo;
+use App\HomeController;
 
 $container = require __DIR__ . '/../app/bootstrap/autoload.php';
 
