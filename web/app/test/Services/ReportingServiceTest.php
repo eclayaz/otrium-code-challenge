@@ -1,11 +1,11 @@
 <?php
 
-use App\Repositories\GrossMerchandiseValueRepository;
+use App\DTOs\TurnoverPerBrand;
+use App\DTOs\TurnoverPerDay;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
 use App\Services\TurnoverReportingService;
 use AppTest\TestCase;
 use Carbon\Carbon;
-use PHPUnit\Framework\MockObject\MockObject;
 
 class ReportingServiceTest extends TestCase
 {
@@ -19,17 +19,19 @@ class ReportingServiceTest extends TestCase
     $this->vat = $this->container->get('vat_percentage');
   }
 
-  /**
-   * @test
-   */
-  public function createTurnoverPerBrandReport_withCorrectStartDateAndDuration_createCSVAndReturnFileName()
+  public function testGenerateTurnoverPerBrandReport()
   {
     $data = [
-      [
-        'day' => '2018-05-01 00:00:00',
-        'brand_name' => 'O-Brand',
-        'turnover_excluding_vat' => 8400.2754
-      ]
+      new TurnoverPerBrand(
+        DateTime::createFromFormat('Y-m-d H:i:s', '2018-05-01 00:00:00'),
+        'O-Brand',
+        34342.98,
+      ),
+      new TurnoverPerBrand(
+        DateTime::createFromFormat('Y-m-d H:i:s', '2018-05-01 00:00:00'),
+        'T-Brand',
+        565.89,
+      )
     ];
     $startDate = '2018-05-01';
     $duration = 6;
@@ -38,25 +40,45 @@ class ReportingServiceTest extends TestCase
 
     $this->gmvRepository
       ->expects($this->once())
-      ->method('getSevenDayTurnoverPerBrand')
+      ->method('getTurnoverPerBrand')
       ->with($startDate, $endDate, $this->vat)
       ->willReturn($data);
 
-    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerBrandReport($startDate, $duration);
+    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))
+      ->generateTurnoverPerBrandReport($startDate, $duration);
 
     $this->assertSame($expectedFileName, $filename);
   }
 
-  /**
-   * @test
-   */
-  public function createTurnoverPerDayReport_withCorrectStartDateAndDuration_createCSVAndReturnFileName()
+  public function testGenerateTurnoverPerBrandReportWithEmptyData()
+  {
+    $this->expectException(InvalidArgumentException::class);
+
+    $startDate = '2018-05-01';
+    $duration = 6;
+    $endDate = Carbon::parse($startDate)->addDays($duration)->toDateString();
+
+    $this->gmvRepository
+      ->expects($this->once())
+      ->method('getTurnoverPerBrand')
+      ->with($startDate, $endDate, $this->vat)
+      ->willReturn([]);
+
+    (new TurnoverReportingService($this->gmvRepository, $this->container))
+      ->generateTurnoverPerBrandReport($startDate, $duration);
+  }
+
+  public function testGenerateTurnoverPerDayReport()
   {
     $data = [
-      [
-        'day' => '2018-05-01 00:00:00',
-        'turnover_excluding_vat' => 8400.2754
-      ]
+      new TurnoverPerDay(
+        DateTime::createFromFormat('Y-m-d H:i:s', '2018-05-01 00:00:00'),
+        34342.98,
+      ),
+      new TurnoverPerDay(
+        DateTime::createFromFormat('Y-m-d H:i:s', '2018-05-01 00:00:00'),
+        565.89,
+      )
     ];
     $startDate = '2018-05-01';
     $duration = 6;
@@ -65,12 +87,31 @@ class ReportingServiceTest extends TestCase
 
     $this->gmvRepository
       ->expects($this->once())
-      ->method('getSevenDayTurnoverPerDay')
+      ->method('getTurnoverPerDay')
       ->with($startDate, $endDate, $this->vat)
       ->willReturn($data);
 
-    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerDayReport($startDate, $duration);
+    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))
+      ->generateTurnoverPerDayReport($startDate, $duration);
 
     $this->assertSame($expectedFileName, $filename);
+  }
+
+  public function testGenerateTurnoverPerDayReportWithEmptyData()
+  {
+    $this->expectException(InvalidArgumentException::class);
+
+    $startDate = '2018-05-01';
+    $duration = 6;
+    $endDate = Carbon::parse($startDate)->addDays($duration)->toDateString();
+
+    $this->gmvRepository
+      ->expects($this->once())
+      ->method('getTurnoverPerDay')
+      ->with($startDate, $endDate, $this->vat)
+      ->willReturn([]);
+
+    (new TurnoverReportingService($this->gmvRepository, $this->container))
+      ->generateTurnoverPerDayReport($startDate, $duration);
   }
 }
