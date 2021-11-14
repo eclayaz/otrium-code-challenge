@@ -4,14 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundHttpException;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
-use App\Utils\CSVWriter;
 use Carbon\Carbon;
-use League\Csv\CannotInsertRecord;
+use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterface
+class TurnoverTurnoverReportingService extends ReportingService implements TurnoverReportingServiceInterface
 {
   private GrossMerchandiseValueRepositoryInterface $gmvRepository;
 
@@ -19,6 +18,7 @@ class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterf
 
   public function __construct(GrossMerchandiseValueRepositoryInterface $gmvRepository, ContainerInterface $container)
   {
+    parent::__construct($container);
     $this->gmvRepository = $gmvRepository;
     $this->container = $container;
   }
@@ -34,22 +34,12 @@ class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterf
         $this->getEndDate($startDate, $duration),
         $this->container->get('vat_percentage')
       );
-    } catch (NotFoundHttpException $e) {
-      throw new \Exception($e->getMessage());
-    }
-
-    try {
       $fileName = '7-days-turnover-per-brand-' . $startDate . '.csv';
-      (new CSVWriter(
-        $this->convertRecordsArray($data),
-        $this->getFilePath($fileName),
-        ['Day', 'Brand Name', 'Turnover Excluding Vat'])
-      )->write();
-    } catch (CannotInsertRecord $e) {
-      throw new \Exception($e->getMessage());
+      $headers = ['Day', 'Brand Name', 'Turnover Without Vat'];
+      return $this->generateCsvReport($fileName, $headers, $data);
+    } catch (NotFoundHttpException $e) {
+      throw new Exception($e->getMessage());
     }
-
-    return $fileName;
   }
 
   /**
@@ -63,46 +53,11 @@ class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterf
         $this->getEndDate($startDate, $duration),
         $this->getVatPercentage()
       );
-    } catch (\Doctrine\DBAL\Driver\Exception | \Doctrine\DBAL\Exception $e) {
-      throw new \Exception($e->getMessage());
-    }
-
-    try {
       $fileName = '7-days-turnover-per-day-' . $startDate . '.csv';
-      (new CSVWriter(
-        $this->convertRecordsArray($data),
-        $this->getFilePath($fileName),
-        ['Day', 'Turnover Excluding Vat'])
-      )->write();
-    } catch (CannotInsertRecord $e) {
-      throw new \Exception($e->getMessage());
-    }
-
-    return $fileName;
-  }
-
-  /**
-   * @param string $fileName
-   * @return string
-   */
-  private function getFilePath(string $fileName): string
-  {
-    try {
-      return $this->container->get('report_store') . '/' . $fileName;
-    } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
-      return  '/../../reports/' . $fileName;
-    }
-  }
-
-  /**
-   * @return float
-   */
-  private function getVatPercentage(): float
-  {
-    try {
-      return $this->container->get('vat_percentage');
-    } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
-      return 0.21;
+      $headers = ['Day', 'Turnover Without Vat'];
+      return $this->generateCsvReport($fileName, $headers, $data);
+    } catch (\Doctrine\DBAL\Driver\Exception | \Doctrine\DBAL\Exception $e) {
+      throw new Exception($e->getMessage());
     }
   }
 
@@ -116,10 +71,15 @@ class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterf
     return Carbon::parse($startDate)->addDays($duration)->toDateString();
   }
 
-  private function convertRecordsArray(array $records): array
+  /**
+   * @return float
+   */
+  private function getVatPercentage(): float
   {
-    return array_map(function ($record) {
-      return $record->__toArray();
-    }, $records);
+    try {
+      return $this->container->get('vat_percentage');
+    } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+      return 0.21;
+    }
   }
 }
