@@ -3,18 +3,14 @@
 namespace App\Repositories;
 
 use App\Exceptions\NotFoundHttpException;
-use Doctrine\DBAL\Driver\Exception as DBALDriverException;
-use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Statement;
+use Doctrine\ORM\QueryBuilder;
 
 interface BaseRepositoryInterface
 {
   /**
-   * @param Statement $statement
+   * @param QueryBuilder $queryBuilder
    * @return array
    * @throws NotFoundHttpException
-   * @throws DBALDriverException
-   * @throws Exception
    */
-   public function find(Statement $statement): array;
+   public function findRecords(QueryBuilder $queryBuilder): array;
 }

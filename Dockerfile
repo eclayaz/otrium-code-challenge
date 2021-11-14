@@ -1,4 +1,4 @@
-FROM php:7.4.10-fpm
+FROM php:8.0-fpm
 
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y \
@@ -40,7 +40,6 @@ RUN apt-get update && apt-get upgrade -y \
     pgsql \
     soap \
     sockets \
-    xmlrpc \
     xsl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
@@ -52,13 +51,13 @@ RUN apt-get update && apt-get upgrade -y \
     && docker-php-ext-install ldap \
     && docker-php-ext-configure zip \
     && docker-php-ext-install zip \
-    && pecl install xdebug && docker-php-ext-enable xdebug \
     && pecl install memcached && docker-php-ext-enable memcached \
-    && pecl install mongodb && docker-php-ext-enable mongodb \
     && pecl install redis && docker-php-ext-enable redis \
     && yes '' | pecl install imagick && docker-php-ext-enable imagick \
     && docker-php-source delete \
     && apt-get remove -y g++ wget \
     && apt-get autoremove --purge -y && apt-get autoclean -y && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/*
+    && rm -rf /tmp/* /var/tmp/* \
+
+RUN echo extension=memcached.so >> /usr/local/etc/php/conf.d/memcached.ini

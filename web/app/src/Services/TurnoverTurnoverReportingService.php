@@ -2,15 +2,19 @@
 
 namespace App\Services;
 
+use App\Exceptions\NotFoundHttpException;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
 use App\Utils\CSVWriter;
 use Carbon\Carbon;
 use League\Csv\CannotInsertRecord;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
-class ReportingService implements ReportingServiceInterface
+class TurnoverTurnoverReportingService implements TurnoverReportingServiceInterface
 {
   private GrossMerchandiseValueRepositoryInterface $gmvRepository;
+
   private ContainerInterface $container;
 
   public function __construct(GrossMerchandiseValueRepositoryInterface $gmvRepository, ContainerInterface $container)
@@ -22,22 +26,25 @@ class ReportingService implements ReportingServiceInterface
   /**
    * @inheritdoc
    */
-  public function createTurnoverPerBrandReport(string $startDate, int $duration): string
+  public function generateTurnoverPerBrandReport(string $startDate, int $duration): string
   {
-    $this->gmvRepository->findX();
     try {
-      $data = $this->gmvRepository->getSevenDayTurnoverPerBrand(
+      $data = $this->gmvRepository->getTurnoverPerBrand(
         $startDate,
-        $this->getEndDateByDuration($startDate, $duration),
+        $this->getEndDate($startDate, $duration),
         $this->container->get('vat_percentage')
       );
-    } catch (\Doctrine\DBAL\Driver\Exception | \Doctrine\DBAL\Exception $e) {
+    } catch (NotFoundHttpException $e) {
       throw new \Exception($e->getMessage());
     }
 
     try {
       $fileName = '7-days-turnover-per-brand-' . $startDate . '.csv';
-      (new CSVWriter($data, $this->getFilePath($fileName), ['Day', 'Brand Name', 'Turnover Excluding Vat']))->write();
+      (new CSVWriter(
+        $this->convertRecordsArray($data),
+        $this->getFilePath($fileName),
+        ['Day', 'Brand Name', 'Turnover Excluding Vat'])
+      )->write();
     } catch (CannotInsertRecord $e) {
       throw new \Exception($e->getMessage());
     }
@@ -48,12 +55,12 @@ class ReportingService implements ReportingServiceInterface
   /**
    * @inheritdoc
    */
-  public function createTurnoverPerDayReport(string $startDate, int $duration): string
+  public function generateTurnoverPerDayReport(string $startDate, int $duration): string
   {
     try {
-      $data = $this->gmvRepository->getSevenDayTurnoverPerDay(
+      $data = $this->gmvRepository->getTurnoverPerDay(
         $startDate,
-        $this->getEndDateByDuration($startDate, $duration),
+        $this->getEndDate($startDate, $duration),
         $this->getVatPercentage()
       );
     } catch (\Doctrine\DBAL\Driver\Exception | \Doctrine\DBAL\Exception $e) {
@@ -62,7 +69,11 @@ class ReportingService implements ReportingServiceInterface
 
     try {
       $fileName = '7-days-turnover-per-day-' . $startDate . '.csv';
-      (new CSVWriter($data, $this->getFilePath($fileName), ['Day', 'Turnover Excluding Vat']))->write();
+      (new CSVWriter(
+        $this->convertRecordsArray($data),
+        $this->getFilePath($fileName),
+        ['Day', 'Turnover Excluding Vat'])
+      )->write();
     } catch (CannotInsertRecord $e) {
       throw new \Exception($e->getMessage());
     }
@@ -76,7 +87,11 @@ class ReportingService implements ReportingServiceInterface
    */
   private function getFilePath(string $fileName): string
   {
-    return $this->container->get('report_store') . '/' . $fileName;
+    try {
+      return $this->container->get('report_store') . '/' . $fileName;
+    } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+      return  '/../../reports/' . $fileName;
+    }
   }
 
   /**
@@ -84,7 +99,11 @@ class ReportingService implements ReportingServiceInterface
    */
   private function getVatPercentage(): float
   {
-    return $this->container->get('vat_percentage');
+    try {
+      return $this->container->get('vat_percentage');
+    } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+      return 0.21;
+    }
   }
 
   /**
@@ -92,8 +111,15 @@ class ReportingService implements ReportingServiceInterface
    * @param int $duration
    * @return string
    */
-  private function getEndDateByDuration(string $startDate, int $duration): string
+  private function getEndDate(string $startDate, int $duration): string
   {
     return Carbon::parse($startDate)->addDays($duration)->toDateString();
+  }
+
+  private function convertRecordsArray(array $records): array
+  {
+    return array_map(function ($record) {
+      return $record->__toArray();
+    }, $records);
   }
 }

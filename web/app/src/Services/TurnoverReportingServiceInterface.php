@@ -6,7 +6,7 @@ use App\Exceptions\NotFoundHttpException;
 use Exception;
 use InvalidArgumentException;
 
-interface ReportingServiceInterface
+interface TurnoverReportingServiceInterface
 {
   /**
    * @param string $startDate
@@ -16,7 +16,7 @@ interface ReportingServiceInterface
    * @throws InvalidArgumentException
    * @throws NotFoundHttpException
    */
-  public function createTurnoverPerBrandReport(string $startDate, int $duration): string;
+  public function generateTurnoverPerBrandReport(string $startDate, int $duration): string;
 
   /**
    * @param string $startDate
@@ -26,5 +26,5 @@ interface ReportingServiceInterface
    * @throws InvalidArgumentException
    * @throws NotFoundHttpException
    */
-  public function createTurnoverPerDayReport(string $startDate, int $duration): string;
+  public function generateTurnoverPerDayReport(string $startDate, int $duration): string;
 }

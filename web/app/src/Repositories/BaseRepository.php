@@ -3,30 +3,32 @@
 namespace App\Repositories;
 
 use App\Exceptions\NotFoundHttpException;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\Exception as DBALDriverException;
-use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Statement;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 
 abstract class BaseRepository implements BaseRepositoryInterface
 {
-  protected Connection $connection;
+  protected EntityManagerInterface $entityManager;
 
-  public function __construct(Connection $connection)
+  public function __construct(EntityManagerInterface $connection)
   {
-    $this->connection = $connection;
+    $this->entityManager = $connection;
   }
 
-
-  public function find(Statement $statement): array
+  /**
+   * @param QueryBuilder $queryBuilder
+   * @return array
+   * @throws NotFoundHttpException
+   */
+  public function findRecords(QueryBuilder $queryBuilder): array
   {
-    $resultSet = $statement->executeQuery();
-    $data = $resultSet->fetchAllAssociative();
+    $result = $queryBuilder->getQuery()
+      ->getResult();
 
-    if (count($data) === 0) {
+    if (count($result) === 0) {
       throw new NotFoundHttpException('Could not find matching records');
     }
 
-    return $data;
+    return $result;
   }
 }

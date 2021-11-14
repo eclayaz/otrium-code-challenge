@@ -3,14 +3,14 @@
 namespace App\Controllers;
 
 use App\Exceptions\NotFoundHttpException;
-use App\Services\ReportingServiceInterface;
+use App\Services\TurnoverReportingServiceInterface;
 use Exception;
 
 final class ReportingController
 {
-  private ReportingServiceInterface $reportingService;
+  private TurnoverReportingServiceInterface $reportingService;
 
-  public function __construct(ReportingServiceInterface $reportingService)
+  public function __construct(TurnoverReportingServiceInterface $reportingService)
   {
     $this->reportingService = $reportingService;
   }
@@ -32,8 +32,8 @@ final class ReportingController
     $reports = [];
 
     try {
-      $reports['turnoverPerBrandReport'] = $this->reportingService->createTurnoverPerBrandReport($startDate, $duration);
-      $reports['turnoverPerDayReport'] = $this->reportingService->createTurnoverPerDayReport($startDate, $duration);
+      $reports['turnoverPerBrandReport'] = $this->reportingService->generateTurnoverPerBrandReport($startDate, $duration);
+      $reports['turnoverPerDayReport'] = $this->reportingService->generateTurnoverPerDayReport($startDate, $duration);
     } catch (NotFoundHttpException | Exception $e) {
       $this->fail($e->getMessage());
       return;

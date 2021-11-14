@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use ArrayIterator;
 use InvalidArgumentException;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;

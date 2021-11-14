@@ -4,11 +4,12 @@ use App\FooInterface;
 use App\Foo;
 use App\Repositories\GrossMerchandiseValueRepository;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
-use App\Services\ReportingService;
-use App\Services\ReportingServiceInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
+use App\Services\TurnoverTurnoverReportingService;
+use App\Services\TurnoverReportingServiceInterface;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
+use Doctrine\ORM\Tools\Setup;
 
 return [
   'connection' => [
@@ -19,16 +20,15 @@ return [
     'driver' => 'pdo_mysql',
   ],
   'report_store' => __DIR__ . '/../../reports',
-  'vat_percentage' => .21,
+  'vat_percentage' => 0.21,
 
-
-  // Database
-  Connection::class => function (ContainerInterface $c) {
-    return DriverManager::getConnection($c->get('connection'));
+  EntityManagerInterface::class => function (ContainerInterface $c){
+    $config = Setup::createAnnotationMetadataConfiguration([__DIR__ . '/../src/Entities'], true);
+    return EntityManager::create($c->get('connection'), $config);
   },
 
   // Bind an interface to an implementation
   GrossMerchandiseValueRepositoryInterface::class => DI\autowire(GrossMerchandiseValueRepository::class),
-  ReportingServiceInterface::class => DI\autowire(ReportingService::class),
+  TurnoverReportingServiceInterface::class => DI\autowire(TurnoverTurnoverReportingService::class),
   FooInterface::class => DI\autowire(Foo::class),
 ];
