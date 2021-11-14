@@ -2,7 +2,7 @@
 
 use App\Repositories\GrossMerchandiseValueRepository;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
-use App\Services\TurnoverTurnoverReportingService;
+use App\Services\TurnoverReportingService;
 use AppTest\TestCase;
 use Carbon\Carbon;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -42,7 +42,7 @@ class ReportingServiceTest extends TestCase
       ->with($startDate, $endDate, $this->vat)
       ->willReturn($data);
 
-    $filename = (new TurnoverTurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerBrandReport($startDate, $duration);
+    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerBrandReport($startDate, $duration);
 
     $this->assertSame($expectedFileName, $filename);
   }
@@ -69,7 +69,7 @@ class ReportingServiceTest extends TestCase
       ->with($startDate, $endDate, $this->vat)
       ->willReturn($data);
 
-    $filename = (new TurnoverTurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerDayReport($startDate, $duration);
+    $filename = (new TurnoverReportingService($this->gmvRepository, $this->container))->generateTurnoverPerDayReport($startDate, $duration);
 
     $this->assertSame($expectedFileName, $filename);
   }

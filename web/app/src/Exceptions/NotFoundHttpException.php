@@ -6,7 +6,7 @@ namespace App\Exceptions;
 /**
  * HTTP 404 Not Found exception class.
  */
-class NotFoundHttpException extends HttpException
+final class NotFoundHttpException extends HttpException
 {
   public const STATUS_NOT_FOUND = 404;
 

@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\Table;
  * @Entity
  * @Table(name="brands")
  */
-class Brand
+final class Brand
 {
   /**
    * @Id @Column(type="integer")

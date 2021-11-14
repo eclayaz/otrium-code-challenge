@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\Table;
  * @Entity()
  * @Table(name="gmv")
  */
-class GMV
+final class GMV
 {
   /**
    * @Id()

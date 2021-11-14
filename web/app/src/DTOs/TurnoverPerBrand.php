@@ -4,7 +4,7 @@ namespace App\DTOs;
 
 use DateTime;
 
-class TurnoverPerBrand
+final class TurnoverPerBrand
 {
   private DateTime $day;
 

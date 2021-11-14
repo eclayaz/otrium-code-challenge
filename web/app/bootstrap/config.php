@@ -2,7 +2,7 @@
 
 use App\Repositories\GrossMerchandiseValueRepository;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
-use App\Services\TurnoverTurnoverReportingService;
+use App\Services\TurnoverReportingService;
 use App\Services\TurnoverReportingServiceInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,5 +27,5 @@ return [
 
   // Bind an interface to an implementation
   GrossMerchandiseValueRepositoryInterface::class => DI\autowire(GrossMerchandiseValueRepository::class),
-  TurnoverReportingServiceInterface::class => DI\autowire(TurnoverTurnoverReportingService::class),
+  TurnoverReportingServiceInterface::class => DI\autowire(TurnoverReportingService::class),
 ];

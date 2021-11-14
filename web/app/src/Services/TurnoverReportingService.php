@@ -10,7 +10,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class TurnoverTurnoverReportingService extends ReportingService implements TurnoverReportingServiceInterface
+final class TurnoverReportingService extends ReportingService implements TurnoverReportingServiceInterface
 {
   private GrossMerchandiseValueRepositoryInterface $gmvRepository;
 
