@@ -1,6 +1,7 @@
 # Global
 .*.swp
 .DS_Store
+.phpunit.result.cache
 
 # Application
 web/app/vendor/
@@ -10,9 +11,7 @@ data/
 web/reports
 
 # PHPStorm
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/dictionaries
+.idea
 
 # VSCode
 .vscode/
