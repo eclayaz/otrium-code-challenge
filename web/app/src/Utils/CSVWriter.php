@@ -2,42 +2,28 @@
 
 namespace App\Utils;
 
-use ArrayIterator;
 use InvalidArgumentException;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Writer;
 use Webmozart\Assert\Assert;
 
-class CSVWriter
+final class CSVWriter
 {
-  private array $data;
-  private string $filePath;
-  private array $headers;
-
   /**
    * @param array $data
    * @param string $filePath
    * @param array $headers
    * @throws InvalidArgumentException
+   * @throws CannotInsertRecord
    */
-  public function __construct(array $data, string $filePath, array $headers)
+  public static function write(array $data, string $filePath, array $headers): void
   {
     Assert::notEmpty($data);
     Assert::notEmpty($filePath);
     Assert::notEmpty($headers);
 
-    $this->data = $data;
-    $this->filePath = $filePath;
-    $this->headers = $headers;
-  }
-
-  /**
-   * @throws CannotInsertRecord
-   */
-  public function write(): void
-  {
-    $writer = Writer::createFromPath($this->filePath . '', 'w+');
-    $writer->insertOne($this->headers);
-    $writer->insertAll($this->data);
+    $writer = Writer::createFromPath($filePath . '', 'w+');
+    $writer->insertOne($headers);
+    $writer->insertAll($data);
   }
 }

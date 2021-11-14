@@ -5,8 +5,10 @@ namespace App\Controllers;
 use App\Exceptions\NotFoundHttpException;
 use App\Services\TurnoverReportingServiceInterface;
 use Exception;
+use InvalidArgumentException;
+use Webmozart\Assert\Assert;
 
-final class ReportingController
+final class ReportingController extends BaseController
 {
   private TurnoverReportingServiceInterface $reportingService;
 
@@ -17,14 +19,14 @@ final class ReportingController
 
   public function __invoke(array $params)
   {
-    $startDate = $params['startDate'];
-    $errors = [];
-    if (empty($startDate)) {
-      $errors['startDate'] = 'Start date is required.';
-    }
+    header('Content-Type: application/json; charset=utf-8');
 
-    if (!empty($errors)) {
-      $this->fail('Validation fail!', $errors);
+    $startDate = $params['startDate'] ?? null;
+    try {
+      Assert::notEmpty($startDate);
+    } catch ( InvalidArgumentException $exception) {
+      $errors['startDate'] = 'Start date is required.';
+      $this->failResponse('Invalid data', $errors);
       return;
     }
 
@@ -35,35 +37,10 @@ final class ReportingController
       $reports['turnoverPerBrandReport'] = $this->reportingService->generateTurnoverPerBrandReport($startDate, $duration);
       $reports['turnoverPerDayReport'] = $this->reportingService->generateTurnoverPerDayReport($startDate, $duration);
     } catch (NotFoundHttpException | Exception $e) {
-      $this->fail($e->getMessage());
+      $this->failResponse($e->getMessage());
       return;
     }
 
-    $this->success($reports);
-  }
-
-  /**
-   * @param string $message
-   * @param array $errors
-   */
-  private function fail(string $message, array $errors = []): void
-  {
-    $data['success'] = false;
-    $data['message'] = $message;
-    $data['errors'] = $errors;
-    echo json_encode($data);
-  }
-
-
-  /**
-   * @param $responseData
-   */
-  private function success($responseData): void
-  {
-    $data['success'] = true;
-    $data['message'] = 'Success!';
-    $data['errors'] = [];
-    $data['responseData'] = $responseData;
-    echo json_encode($data);
+    $this->successResponse($reports);
   }
 }

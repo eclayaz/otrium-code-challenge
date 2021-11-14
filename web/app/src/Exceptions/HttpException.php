@@ -5,7 +5,8 @@ namespace App\Exceptions;
 
 class HttpException extends \DomainException
 {
-  const STATUS_CODE_LIMIT = 600;
+  public const STATUS_CODE_LIMIT = 600;
+  public const STATUS_BAD_REQUEST = 400;
 
   /**
    * @param string          $message
@@ -13,7 +14,6 @@ class HttpException extends \DomainException
    * @param int             $code
    * @param int             $statusCode
    * @param \Throwable|null $previous
-   *
    * @throws \RuntimeException
    */
   public function __construct(
@@ -23,7 +23,7 @@ class HttpException extends \DomainException
     int $statusCode,
     \Throwable $previous = null
   ) {
-    if ($statusCode < StatusCodeInterface::STATUS_BAD_REQUEST || $statusCode >= static::STATUS_CODE_LIMIT) {
+    if ($statusCode < static::STATUS_BAD_REQUEST || $statusCode >= static::STATUS_CODE_LIMIT) {
       throw new \RuntimeException(\sprintf('%s is not a valid HTTP error status code', $statusCode));
     }
 

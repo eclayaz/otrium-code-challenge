@@ -19,21 +19,16 @@ abstract class ReportingService implements ReportingServiceInterface
   }
 
   /**
-   * @param string $fileName
-   * @param array $headers
-   * @param array $records
-   * @return string
-   * @throws Exception
+   * @inheritDoc
    */
   public function generateCsvReport(string $fileName, array $headers, array $records): string
   {
     try {
-      (new CSVWriter(
+      CSVWriter::write(
         $this->convertRecordsToArray($records),
         $this->getFilePath($fileName),
         $headers
-        )
-      )->write();
+      );
     } catch (CannotInsertRecord $e) {
       throw new Exception($e->getMessage());
     }

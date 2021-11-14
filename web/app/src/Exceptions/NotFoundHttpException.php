@@ -8,6 +8,8 @@ namespace App\Exceptions;
  */
 class NotFoundHttpException extends HttpException
 {
+  public const STATUS_NOT_FOUND = 404;
+
   /**
    * @param string|null     $message
    * @param string|null     $description
@@ -23,8 +25,8 @@ class NotFoundHttpException extends HttpException
     parent::__construct(
       $message ?? 'Not Found',
       $description ?? '',
-      $code ?? StatusCodeInterface::STATUS_NOT_FOUND,
-      StatusCodeInterface::STATUS_NOT_FOUND,
+      $code ?? self::STATUS_NOT_FOUND,
+      self::STATUS_NOT_FOUND,
       $previous
     );
   }

@@ -1,7 +1,5 @@
 <?php
 
-use App\FooInterface;
-use App\Foo;
 use App\Repositories\GrossMerchandiseValueRepository;
 use App\Repositories\GrossMerchandiseValueRepositoryInterface;
 use App\Services\TurnoverTurnoverReportingService;
@@ -30,5 +28,4 @@ return [
   // Bind an interface to an implementation
   GrossMerchandiseValueRepositoryInterface::class => DI\autowire(GrossMerchandiseValueRepository::class),
   TurnoverReportingServiceInterface::class => DI\autowire(TurnoverTurnoverReportingService::class),
-  FooInterface::class => DI\autowire(Foo::class),
 ];
